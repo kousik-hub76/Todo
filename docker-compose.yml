@@ -1,4 +1,7 @@
+
+
 version: '3.8'
+
 services:
   mysql:
     image: mysql:8.0
@@ -9,8 +12,32 @@ services:
       MYSQL_USER: myuser
       MYSQL_PASSWORD: mypassword
     ports:
-      - "5001:3306" #first-mymachine port last:VM(docker port)
+      - "5001:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+    networks:
+      - deployment-infra_cicd-network
+
+  backend:
+    build: .
+    container_name: backend_service
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mysql
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npm run dev
+    networks:
+      - deployment-infra_cicd-network
+
+      
 volumes:
   mysql_data:
+
+networks:
+  deployment-infra_cicd-network:
+    external: true
